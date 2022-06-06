@@ -17,7 +17,6 @@ type (
 	Option func(*options)
 
 	options struct {
-		withInnerClone bool
 	}
 )
 
@@ -25,18 +24,38 @@ func defaultOptions() *options {
 	return &options{}
 }
 
-func NewExecutor[T any](batchSize int, executor func([]T), opts ...Option) *Executor[T] {
+func NewExecutor[T any | *any](batchSize int, executor func([]T), opts ...Option) *Executor[T] {
 	e := &Executor[T]{
 		batchSize: batchSize,
 		executor:  executor,
 		options:   defaultOptions(),
 	}
+
 	for _, apply := range opts {
 		apply(e.options)
 	}
 
 	return e
 }
+
+func (e *Executor[T]) cloneBatch(in []T) []T {
+	clone := make([]T, len(in))
+	copy(clone, e.batch)
+
+	return clone
+}
+
+/*
+func (e *Executor[T]) cloneElementsBatch(in []T) []T {
+	clone := make([]T, len(in))
+	for i, element := range in {
+		copied := *element
+		clone[i] = &copied
+	}
+
+	return clone
+}
+*/
 
 func (e *Executor[T]) Push(in T) {
 	e.mx.Lock()
@@ -63,27 +82,7 @@ func (e *Executor[T]) executeClone() {
 		return
 	}
 
-	e.executor(e.cloneBatch())
+	e.executor(e.cloneBatch(e.batch))
 	e.count += uint64(len(e.batch))
 	e.batch = e.batch[:0]
-}
-
-func (e *Executor[T]) cloneBatch() []T {
-	clone := make([]T, len(e.batch))
-
-	/*
-		// TODO: do we have to clone elements? (option)
-		if e.options.withInnerClone {
-			for i, element := range e.batch {
-				copied := *element
-				clone[i] = &copied
-			}
-
-		} else {
-			copy(clone, e.batch)
-		}
-	*/
-	copy(clone, e.batch)
-
-	return clone
 }
