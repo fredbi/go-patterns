@@ -45,13 +45,15 @@ A collection of iterator utitilies:
 A batcher is something that execute some process in batches.
 
 * [ ] assert performance - I expect that using a generic struct, not method, reduces the performance penalty due to the compiler's stencilinh.
-* [ ] introduce variations to shallow clone batched input elements (e.g. when we have `[]*TYPE` slices)
+* [x] introduce variations to shallow clone batched input elements (e.g. when we have `[]*TYPE` slices)
 * [ ] write testable examples
 
 > Findings: at the moment, there is no easy way to perform a type assertion on the parametric types.
 >
 > For instance, it's unclear what kind of type I can pass. I don't know how to check that with built-in type constraints.
 > As of go1.18.3, it looks like I have to build methods like `method(p TYPE)` and `methodPtr(p *TYPE)` specifically.
+>
+> I've been disappointed by the difficulty to use `any|*any` and be able in the code to figure out when this is a pointer type.
 
 
 ## pipelines
