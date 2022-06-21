@@ -9,20 +9,15 @@ type (
 		any
 	}
 
-	Batch[T TypeConstraint]        []T
-	BatchPointer[T TypeConstraint] []*T
+	// Batch[T TypeConstraint] is a slice of elements used to define a processing batch.
+	// A Batch knows how to produce a clone.
+	Batch[T TypeConstraint] []T
 
 	baseExecutor[T TypeConstraint] struct {
 		batchSize int
 		mx        sync.Mutex
 		count     uint64
 		*options
-	}
-
-	Option func(*options)
-
-	options struct {
-		// TODO
 	}
 )
 
@@ -41,27 +36,12 @@ func (b Batch[T]) Empty() Batch[T] {
 	return b[:0]
 }
 
-func (b BatchPointer[T]) Clone() BatchPointer[T] {
-	// when adopting slices of pointers, we shallow clone individual elements
-	clone := make(BatchPointer[T], len(b))
-	for i, element := range b {
-		copied := *element
-		clone[i] = &copied
-	}
+//nolint:revive // bug in current version of revive linter
+func (e *baseExecutor[T]) Executed() uint64 {
+	e.mx.Lock()
+	defer e.mx.Unlock()
 
-	return clone
-}
-
-func (b BatchPointer[T]) Len() int {
-	return len(b)
-}
-
-func (b BatchPointer[T]) Empty() BatchPointer[T] {
-	return b[:0]
-}
-
-func defaultOptions() *options {
-	return &options{}
+	return e.count
 }
 
 func newBaseExecutor[T TypeConstraint](batchSize int, opts ...Option) *baseExecutor[T] {

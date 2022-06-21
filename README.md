@@ -32,21 +32,24 @@ A collection of iterator utitilies:
 * A batcher is used to execute some repeated action on a batch of T, every time there are enough elements pushed to the batch.
 * 2 goroutine-safe methods: Push(T), Flush() 
 * The `executor func([]T)` is assumed to handle errors etc. It is executed when the batch size is reached or on Flush().
-* Options to consider (TODO):
-    * Shallow clone of batch elements
+
+* Options to consider:
+    * Optional shallow clone of batch elements (atm cloned by default on pointers)
     * Timeout on buffering wait
-* TODO: insertBatcher
+* TODO: InsertBatcher
   * a common specialized usage of the batcher to construct Postgres multi-values batch INSERTs
-* TODO: parallelBatcher
+* TODO: ParallelBatcher
   * run executors as parallel go routines with a throttle
+* TODO: ErrBatcher
+  * executor may return an error
 
 ### TODOs on batchers
 
-A batcher is something that execute some process in batches.
+A batcher is something that execute some processing in batches.
 
 * [ ] assert performance - I expect that using a generic struct, not method, reduces the performance penalty due to the compiler's stencilinh.
 * [x] introduce variations to shallow clone batched input elements (e.g. when we have `[]*TYPE` slices)
-* [ ] write testable examples
+* [x] write testable examples
 
 > Findings: at the moment, there is no easy way to perform a type assertion on the parametric types.
 >
@@ -87,6 +90,10 @@ This leverage the Postgres multiple `VALUES()` syntax. There is also a slightly 
 # multi-sorter (TODO)
 
 Objective: to produce a compound Less(int,int) bool method out of multiple individual criteria.
+
+Type constraints:
+* either `ordered`
+* or `comparable` and implement some `Compare(T1,T2)`` int interface
 
 e.g.: implement for any number of criteria (a,b,c ...):
 ```go 

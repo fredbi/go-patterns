@@ -28,13 +28,13 @@ func (e *Executor[T]) Push(in T) {
 }
 
 func (e *Executor[T]) Flush() {
+	e.mx.Lock()
+	defer e.mx.Unlock()
+
 	e.executeClone()
 }
 
 func (e *Executor[T]) executeClone() {
-	e.mx.Lock()
-	defer e.mx.Unlock()
-
 	if e.batch.Len() == 0 {
 		return
 	}
