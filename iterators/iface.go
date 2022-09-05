@@ -30,4 +30,9 @@ type (
 	}
 
 	dummy struct{}
+
+	baseIterator[T any] interface {
+		Iterator
+		Item() (T, error)
+	}
 )

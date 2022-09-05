@@ -71,9 +71,17 @@ func (ri *RowsIterator[R, T]) Item() (T, error) {
 }
 
 func (ri *RowsIterator[R, T]) Collect() ([]T, error) {
-	collection := make([]T, 0, ri.preallocatedItems)
+	return collectAndClose[T](ri, ri.preallocatedItems)
+}
 
-	for ri.rows.Next() {
+func (ri *RowsIterator[R, T]) CollectPtr() ([]*T, error) {
+	return collectPtrAndClose[T](ri, ri.preallocatedItems)
+}
+
+func collectAndClose[T any](ri baseIterator[T], preallocatedItems int) ([]T, error) {
+	collection := make([]T, 0, preallocatedItems)
+
+	for ri.Next() {
 		item, err := ri.Item()
 		if err != nil {
 			_ = ri.Close()
@@ -91,10 +99,10 @@ func (ri *RowsIterator[R, T]) Collect() ([]T, error) {
 	return collection, nil
 }
 
-func (ri *RowsIterator[R, T]) CollectPtr() ([]*T, error) {
-	collection := make([]*T, 0, ri.preallocatedItems)
+func collectPtrAndClose[T any](ri baseIterator[T], preallocatedItems int) ([]*T, error) {
+	collection := make([]*T, 0, preallocatedItems)
 
-	for ri.rows.Next() {
+	for ri.Next() {
 		item, err := ri.Item()
 		if err != nil {
 			_ = ri.Close()
