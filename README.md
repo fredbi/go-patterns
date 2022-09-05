@@ -6,31 +6,32 @@ This repository reflects ongoing research to explore the capabilities of the new
 
 This is _applied_ research, seeking to reduce the boiler plate and/or generated code on useful patterns.
 
-The patters that I am exploring here mostly revolve around the idea of slicing or regrouping elements from an iterable data stream.
+The patterns that I am exploring here mostly revolve around the idea of slicing or regrouping elements from an iterable data stream.
 
-## iterators
+## Iterators
 
 A collection of iterator utitilies:
 * an iterator is essentially something that knows what's `Next() bool` and collect the next `Item() T`
 * the `iterators` package exposes 3 generic variants:
   1. Simple iterator from a slice `[]T` (e.g. to build mocks, etc)
-  2. SQL rows iterator using sqlx.Rows and the `StructScan(interface{}) error` method.
+  2. SQL rows iterator using github.com/jmoiron/sqlx.Rows and the `StructScan(interface{}) error` method.
      (this is used to iterate over unmarshaled structs scanned from a SQL cursor).
-  3. FanIn iterator that joins a collection of input iterators in parallel (the result is unordered).
+  3. ChanIterator that joins a collection of input iterators in parallel (the result is unordered).
      Options: inner channel buffers
+  4. TransformIterator that applies a data transform on the iterations of some other base iterator.
 
-> NOTE: this is typically a piece of code to replace generated iterators.
+> NOTE: I like the iterator pattern a lot when it comes to fetch from a database an arbitrary number of rows.
+> Iterators allow a stream of data to traverse all the layers of an app without undue intermediary buffering.
 
 ### TODOs on iterator
 
 * [ ] assert performance - I expect that using a generic struct, not method, reduces the performance penalty due to the compiler's stencilinh.
-* [ ] implement the channel-based fan-in iterator
-* [ ] write testable examples
 
-## batchers
+## Batchers
 
 * A batcher is used to execute some repeated action on a batch of T, every time there are enough elements pushed to the batch.
-* 2 goroutine-safe methods: Push(T), Flush() 
+* It is intended to apply to a stream of inputs, some executor function on a slice of fixed maximum size.
+* Simple interface: 2 goroutine-safe methods: Push(T), Flush() 
 * The `executor func([]T)` is assumed to handle errors etc. It is executed when the batch size is reached or on Flush().
 
 * Options to consider:
@@ -45,7 +46,7 @@ A collection of iterator utitilies:
 
 ### TODOs on batchers
 
-A batcher is something that execute some processing in batches.
+A batcher is something that executes some processing in batches.
 
 * [ ] assert performance - I expect that using a generic struct, not method, reduces the performance penalty due to the compiler's stencilinh.
 * [x] introduce variations to shallow clone batched input elements (e.g. when we have `[]*TYPE` slices)
@@ -59,11 +60,12 @@ A batcher is something that execute some processing in batches.
 > I've been disappointed by the difficulty to use `any|*any` and be able in the code to figure out when this is a pointer type.
 
 
-## pipelines
+## Pipelines
 
-This is essentially intended to make my async code more readable and easier to guard against type error when mixing channels conveying messages of different types.
+This is intended to make my async code more readable and easier to guard against type error when mixing channels conveying messages of different types.
 
-I don't want to mimic node's Promises. I just want plain async that can run multiple IN/OUT channels and check at a glance that types are correct.
+I don't want to mimic node's Promises.
+I just want plain async that can run multiple IN/OUT channels and check at a glance that types are correct.
 I want the pipelines to be able to send out-of-band notifications to some listener ("bus").
 
 Pipelines patterns to support:
@@ -89,7 +91,7 @@ This leverage the Postgres multiple `VALUES()` syntax. There is also a slightly 
 
 # multi-sorter (TODO)
 
-Objective: to produce a compound Less(int,int) bool method out of multiple individual criteria.
+Objective: to produce a compound Less(int,int) bool method out of multiple individual sorting criteria.
 
 Type constraints:
 * either `ordered`
