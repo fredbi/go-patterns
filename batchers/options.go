@@ -7,7 +7,6 @@ type (
 	Option func(*options)
 
 	options struct {
-		// TODO
 	}
 )
 

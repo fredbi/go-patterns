@@ -1,5 +1,10 @@
 package batchers
 
+// PointerExecutor runs an executor function over a batch of pointers *T.
+//
+// A shallow copy of *T is performed when assembling into a new batch.
+//
+// Apart from the pointer logic, the PointerExecutor behaves like the Executor.
 type PointerExecutor[T TypeConstraint] struct {
 	*baseExecutor[T]
 	batch    Batch[*T]

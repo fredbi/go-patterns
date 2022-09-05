@@ -1,5 +1,10 @@
 package batchers
 
+// Executor runs an executor function over a batch of T.
+//
+// The Executor handles the slicing of Push-ed input into batches of fixed size.
+//
+// When the stream of input is complete, a call to Flush() executes the last (possibly incomplete) batch.
 type Executor[T TypeConstraint] struct {
 	*baseExecutor[T]
 	batch    Batch[T]

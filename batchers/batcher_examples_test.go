@@ -1,9 +1,8 @@
-//nolint: forbidigo
+// nolint: forbidigo
 package batchers_test
 
 import (
 	"fmt"
-	"testing"
 
 	"github.com/fredbi/go-patterns/batchers"
 )
@@ -24,7 +23,9 @@ func makeTestItems(n int) []testItem {
 	return fixtures
 }
 
-func TestExecutor(_ *testing.T) {
+func ExampleExecutor() {
+	// This example pushes a few test items into 2 batch executors.
+
 	const n = 42
 
 	batchExecutor := batchers.NewExecutor[testItem](10, func(in batchers.Batch[testItem]) {
@@ -45,7 +46,8 @@ func TestExecutor(_ *testing.T) {
 
 	for _, item := range makeTestItems(n) {
 		batchExecutor.Push(item)
-		batchExecutorWithPointers.Push(&item) //nolint:gosec  // we actually clone the value pointed to immediatly, so we may safely pass the iterated (constant) pointer here
+		// we actually clone immediately the value that is pointed to, so we may safely pass the iterated (constant) pointer here
+		batchExecutorWithPointers.Push(&item) //nolint:gosec
 	}
 
 	batchExecutor.Flush()
