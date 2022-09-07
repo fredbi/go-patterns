@@ -47,14 +47,9 @@ func GetIteratorContext(ctx context.Context) *IteratorContext {
 // The parent context provided allows the transformer to know about the current context of the iterator.
 //
 // This is useful if the transformation depends on the currently iterated step.
-// The parent context may be nil: in that case, context.Background will be used.
 //
 // Notice that the transformer may also perform some other things, e.g. logging, collecting some stats or traces.
 func NewTransformIterator[S, T any](ctx context.Context, iterator StructIterator[S], transformer TransformerCtx[S, T], opts ...RowsIteratorOption) *TransformIterator[S, T] {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
 	return &TransformIterator[S, T]{
 		StructIterator:      iterator,
 		ctx:                 ctx,
@@ -65,6 +60,15 @@ func NewTransformIterator[S, T any](ctx context.Context, iterator StructIterator
 
 func (rt *TransformIterator[S, T]) iteratorContext() context.Context {
 	return context.WithValue(rt.ctx, ctxKeyIteration, &IteratorContext{Iterated: rt.iterated})
+}
+
+func (rt *TransformIterator[S, T]) Next() bool {
+	isNext := rt.StructIterator.Next()
+	if isNext {
+		rt.iterated++
+	}
+
+	return isNext
 }
 
 func (rt *TransformIterator[S, T]) Item() (T, error) {

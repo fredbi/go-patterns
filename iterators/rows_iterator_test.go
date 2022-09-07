@@ -30,11 +30,12 @@ func TestRowsIterator(t *testing.T) {
 				rows, err := testdb.OpenDBCursor(db)
 				require.NoError(t, err)
 
-				iterator := NewSqlxIterator[testdb.DummyRow](rows)
+				iterator := NewSqlxIterator[testdb.DummyRow](rows, WithRowsPreallocatedItems(10))
 				items, err := iterator.CollectPtr()
 				require.NoError(t, err)
 
 				require.Len(t, items, 2)
+				require.Equal(t, 10, cap(items))
 			})
 		})
 
@@ -79,8 +80,8 @@ func TestRowsIterator(t *testing.T) {
 
 			count := 0
 			for iterator.Next() {
-				item, err := iterator.Item()
-				if err != nil {
+				item, e := iterator.Item()
+				if e != nil {
 					break
 				}
 				require.NotEmpty(t, item)

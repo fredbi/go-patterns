@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	sq "github.com/Masterminds/squirrel"
+	// initialize DB driver
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
 )

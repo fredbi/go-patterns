@@ -14,8 +14,7 @@ type (
 	chanIteratorOptions struct {
 		*rowsIteratorOptions
 
-		fanInBuffers  int
-		fanOutBuffers int
+		fanInBuffers int
 	}
 )
 
@@ -33,6 +32,8 @@ func rowsIteratorOptionsWithDefault(opts []RowsIteratorOption) *rowsIteratorOpti
 
 // WithRowsPreallocatedItems preallocate n items in the returned slice when
 // using the Collect and CollectPtr methods.
+//
+// The default value is 1000.
 func WithRowsPreallocatedItems(n int) RowsIteratorOption {
 	return func(o *rowsIteratorOptions) {
 		o.preallocatedItems = n
@@ -42,7 +43,7 @@ func WithRowsPreallocatedItems(n int) RowsIteratorOption {
 func chanIteratorOptionsWithDefault(opts []ChanIteratorOption) *chanIteratorOptions {
 	options := &chanIteratorOptions{
 		rowsIteratorOptions: rowsIteratorOptionsWithDefault(nil),
-		fanOutBuffers:       1,
+		fanInBuffers:        -1,
 	}
 	for _, apply := range opts {
 		apply(options)
@@ -60,15 +61,10 @@ func WithChanPreallocatedItems(n int) ChanIteratorOption {
 }
 
 // WithChanFanInBuffers allocates buffers to fan-in the input results.
+//
+// The default value is the number of underlying iterators.
 func WithChanFanInBuffers(n int) ChanIteratorOption {
 	return func(o *chanIteratorOptions) {
 		o.fanInBuffers = n
-	}
-}
-
-// WithChanFanOutBuffers allocates buffers to fan-out the input results.
-func WithChanFanOutBuffers(n int) ChanIteratorOption {
-	return func(o *chanIteratorOptions) {
-		o.fanOutBuffers = n
 	}
 }

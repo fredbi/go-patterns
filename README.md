@@ -17,7 +17,6 @@ A collection of iterator utitilies:
   2. SQL rows iterator using github.com/jmoiron/sqlx.Rows and the `StructScan(interface{}) error` method.
      (this is used to iterate over unmarshaled structs scanned from a SQL cursor).
   3. ChanIterator that joins a collection of input iterators in parallel (the result is unordered).
-     Options: inner channel buffers
   4. TransformIterator that applies a data transform on the iterations of some other base iterator.
 
 > NOTE: I like the iterator pattern a lot when it comes to fetch from a database an arbitrary number of rows.

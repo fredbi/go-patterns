@@ -2,9 +2,11 @@ package iterators
 
 import (
 	"context"
-	"golang.org/x/sync/errgroup"
+	"errors"
 	"io"
 	"sync"
+
+	"golang.org/x/sync/errgroup"
 )
 
 var _ StructIterator[dummy] = &ChanIterator[dummy]{}
@@ -13,22 +15,22 @@ var _ StructIterator[dummy] = &ChanIterator[dummy]{}
 //
 // Notice that its asynchronous working does not make it suitable to collect ordered items.
 //
+// The ChanIterator is goroutine-safe and may be iterated by several concurrent goroutines.
+//
 // The input is collected from a collection of input StructIterators, then may be collected by one or several goroutines
 // reading from the ChanIterator using Next() and Item().
 //
-// If iterating in parallel from several goroutines, the WithChanFanOutBuffers option must be used to instruct the iterator to
-// use at least as many buffers as there are readers and avoid blocking due to a starved channel.
+// Item() may return io.EOF is the iterator is done with producing records (e.g. some other consumer reached the end of the stream).
 //
 // WithChanFanInBuffers may be used to pre-fetch from input iterators asynchronously.
 //
 // Methods Collect() and CollectPrt() can't be used by concurrent goroutines and are protected against such a misuse.
 type ChanIterator[T any] struct {
 	fanIn       chan T
-	fanOut      chan T
-	current     *T
 	workerGroup *errgroup.Group
 	ctx         context.Context
 	mx          sync.Mutex
+	done        chan struct{}
 
 	*chanIteratorOptions
 }
@@ -44,10 +46,14 @@ func NewChanIterator[T any](ctx context.Context, iterators []StructIterator[T], 
 		ctx:                 groupCtx,
 		workerGroup:         workerGroup,
 		chanIteratorOptions: chanIteratorOptionsWithDefault(opts),
+		done:                make(chan struct{}),
+	}
+
+	if iter.fanInBuffers < 0 {
+		iter.fanInBuffers = len(iterators)
 	}
 
 	iter.fanIn = make(chan T, iter.fanInBuffers)
-	iter.fanOut = make(chan T, iter.fanOutBuffers)
 
 	for i := range iterators {
 		idx := i
@@ -81,6 +87,7 @@ func NewChanIterator[T any](ctx context.Context, iterators []StructIterator[T], 
 	workerGroup.Go(func() error {
 		pendingWorkers.Wait()
 		close(iter.fanIn)
+		close(iter.done)
 
 		return nil
 	})
@@ -90,34 +97,26 @@ func NewChanIterator[T any](ctx context.Context, iterators []StructIterator[T], 
 
 func (d *ChanIterator[T]) Next() bool {
 	select {
-	case item, ok := <-d.fanIn:
-		if !ok {
-			return false
-		}
-		select {
-		case d.fanOut <- item:
-		case <-d.ctx.Done():
-			return false
-		}
-
-		return true
-
+	case <-d.done:
+		return len(d.fanIn) > 0
 	case <-d.ctx.Done():
 		return false
+	default:
+		return true
 	}
 }
 
 func (d *ChanIterator[T]) Item() (T, error) {
-	if d.current == nil {
-		var empty T
-		return empty, io.EOF
-	}
+	var empty T
 
 	select {
-	case item := <-d.fanOut:
+	case item, ok := <-d.fanIn:
+		if !ok {
+			return empty, io.EOF
+		}
+
 		return item, nil
 	case <-d.ctx.Done():
-		var empty T
 		return empty, d.ctx.Err()
 	}
 }
@@ -134,9 +133,11 @@ func (d *ChanIterator[T]) Collect() ([]T, error) {
 	for d.Next() {
 		item, err := d.Item()
 		if err != nil {
-			_ = d.Close()
+			if errors.Is(err, io.EOF) {
+				break
+			}
 
-			return nil, err
+			return results, preferErrorOverContext(err, d.Close())
 		}
 		results = append(results, item)
 	}
@@ -153,12 +154,27 @@ func (d *ChanIterator[T]) CollectPtr() ([]*T, error) {
 	for d.Next() {
 		item, err := d.Item()
 		if err != nil {
-			_ = d.Close()
+			if errors.Is(err, io.EOF) {
+				break
+			}
 
-			return nil, err
+			return results, preferErrorOverContext(err, d.Close())
 		}
 		results = append(results, &item)
 	}
 
 	return results, d.Close()
+}
+
+// preferErrorOverContext returns a specific error preferrably
+// to the generic "context cancelled" error, whenever available.
+func preferErrorOverContext(err1, err2 error) error {
+	isCancelled1 := errors.Is(err1, context.Canceled)
+	isCancelled2 := errors.Is(err2, context.Canceled)
+
+	if isCancelled1 && !isCancelled2 {
+		return err2
+	}
+
+	return err1
 }
