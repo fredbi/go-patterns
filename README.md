@@ -58,6 +58,11 @@ A batcher is something that executes some processing in batches.
 >
 > I've been disappointed by the difficulty to use `any|*any` and be able in the code to figure out when this is a pointer type.
 
+# multi-sorter
+
+This package provides a way to apply compound sorting criteria to a collection of any type.
+
+It provides utilities to build comparison operators for common types and pointers.
 
 ## Pipelines
 
@@ -87,30 +92,3 @@ This leverage the Postgres multiple `VALUES()` syntax. There is also a slightly 
 ### TODOs on upserters
 
 [ ] Publish generic implementation
-
-# multi-sorter (TODO)
-
-Objective: to produce a compound Less(int,int) bool method out of multiple individual sorting criteria.
-
-Type constraints:
-* either `ordered`
-* or `comparable` and implement some `Compare(T1,T2)`` int interface
-
-e.g.: implement for any number of criteria (a,b,c ...):
-```go 
-Less := func(i, ) bool {
-    if a[i] == a[j] {
-        if b[i] == b[j] {
-            return c[i] < c[j]
-        }
-
-        return b[i] < c[j]
-    }
-
-    return a[i] < a[j]
-}
-```
-
-* produces a `Less() bool` function for multiple criteria.
-  Example: a < b, if a == b then c < d,  if c == d, then e < f etc.
-* API: `CompoundLes(criteria ...func(int, int) int) func(int, int) bool`
