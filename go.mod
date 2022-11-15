@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.8.0
+	golang.org/x/exp v0.0.0-20221114191408-850992195362
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	golang.org/x/text v0.3.7
 )
