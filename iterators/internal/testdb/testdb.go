@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"sync"
 
 	sq "github.com/Masterminds/squirrel"
@@ -42,6 +43,31 @@ func OpenDB(dbName string) (*sqlx.DB, error) {
 		return nil, err
 	}
 	u.Path = dbName
+
+	info := u.User
+	if info == nil {
+		info = url.User("postgres")
+	}
+
+	// take overrides from env, e.g. for CI
+	if user := os.Getenv("PGUSER"); user != "" {
+		pwd, _ := info.Password()
+		info = url.UserPassword(user, pwd)
+	}
+	if pwd := os.Getenv("PGPASSWORD"); pwd != "" {
+		user := info.Username()
+		info = url.UserPassword(user, pwd)
+	}
+	host := os.Getenv("PGHOST")
+	port := os.Getenv("PGPORT")
+	switch {
+	case host != "" && port == "":
+		u.Host = fmt.Sprintf("%s:%s", host, "5432")
+	case host != "" && port != "":
+		u.Host = fmt.Sprintf("%s:%s", host, port)
+	case host == "" && port != "":
+		u.Host = fmt.Sprintf("%s:%s", "localhost", port)
+	}
 
 	db, err := sqlx.Open("pgx", u.String())
 	if err != nil {
