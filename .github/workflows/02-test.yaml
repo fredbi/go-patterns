@@ -30,7 +30,7 @@ jobs:
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
-          PGPORT: 5321
+          PGPORT: 5432
           PGHOST: postgres
         run: |
           go test -v ./...
