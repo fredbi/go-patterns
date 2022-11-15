@@ -1,16 +1,9 @@
 package pipelines_test
 
-import (
-	"context"
-	"fmt"
+// "strings"
 
-	// "strings"
-
-	"github.com/davecgh/go-spew/spew"
-	"github.com/fredbi/go-patterns/pipelines"
-	"golang.org/x/sync/errgroup"
-)
-
+/*
+  TODO
 func ExampleChainedPipeline_withoutBus() {
 	// This example creates a simple pipeline operation that feeds 3 integers to a pipeline that computes their squares,
 	// then to collector that prints out the result.
@@ -91,3 +84,4 @@ func ExampleChainedPipeline_withoutBus() {
 	// received: 3
 	// received: 4
 }
+*/

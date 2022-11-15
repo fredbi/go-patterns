@@ -72,6 +72,8 @@ I don't want to mimic node's Promises.
 I just want plain async that can run multiple IN/OUT channels and check at a glance that types are correct.
 I want the pipelines to be able to send out-of-band notifications to some listener ("bus").
 
+TODO: basic pipelines work, but it is still difficult to get a nice, idiomatic chain of pipelines running smooth as I had expected.
+
 Pipelines patterns to support:
 * in/out/bus
 * fan-int
