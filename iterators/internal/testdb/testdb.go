@@ -5,6 +5,7 @@ package testdb
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"sync"
@@ -15,14 +16,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const base = "postgresql://postgres@localhost:5432?sslmode=disable"
+const (
+	base   = "postgresql://postgres@localhost:5432?sslmode=disable"
+	dbName = "test_iterator_%d"
+)
 
 type DummyRow struct {
 	A int    `db:"a"`
 	B string `db:"b"`
 }
-
-const dbName = "test_iterator_%d"
 
 var (
 	testIndex int
@@ -53,10 +55,12 @@ func OpenDB(dbName string) (*sqlx.DB, error) {
 	if user := os.Getenv("PGUSER"); user != "" {
 		pwd, _ := info.Password()
 		info = url.UserPassword(user, pwd)
+		u.User = info
 	}
 	if pwd := os.Getenv("PGPASSWORD"); pwd != "" {
 		user := info.Username()
 		info = url.UserPassword(user, pwd)
+		u.User = info
 	}
 	host := os.Getenv("PGHOST")
 	port := os.Getenv("PGPORT")
@@ -68,6 +72,8 @@ func OpenDB(dbName string) (*sqlx.DB, error) {
 	case host == "" && port != "":
 		u.Host = fmt.Sprintf("%s:%s", "localhost", port)
 	}
+
+	log.Printf("DEBUG: postgres URL: %s", u.String())
 
 	db, err := sqlx.Open("pgx", u.String())
 	if err != nil {
@@ -108,7 +114,7 @@ func CreateDBWithWrongData(dbName string) (*sqlx.DB, error) {
 }
 
 func createDB(dbName string) (*sqlx.DB, error) {
-	emptyDB, err := sqlx.Open("pgx", base)
+	emptyDB, err := OpenDB("")
 	if err != nil {
 		return nil, err
 	}
