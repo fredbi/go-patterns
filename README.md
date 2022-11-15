@@ -1,3 +1,8 @@
+![Lint](https://github.com/fredbi/go-patterns/actions/workflows/01-golang-lint.yaml/badge.svg)
+![CI](https://github.com/fredbi/go-patterns/actions/workflows/02-test.yaml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/fredbi/go-patterns/badge.svg)](https://coveralls.io/github/fredbi/go-patterns)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/fredbi/go-patterns)
+
 # go-patterns
 
 Musings with go1.18 generics to implement a few simple algorithms.
