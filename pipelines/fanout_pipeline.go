@@ -12,7 +12,6 @@ import (
 // with a few options available to introduce hooks, which could be used to:
 // * collect metrics & logging
 // * cloning output messages if they pass references that are mutated downstream
-//
 type FanOutPipeline[INOUT any, BUS any] struct {
 	*commonPipeline[INOUT, INOUT, BUS]
 	*fanOutOptions[INOUT, BUS]

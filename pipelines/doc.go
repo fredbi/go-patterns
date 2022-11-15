@@ -9,7 +9,7 @@
 // This implementation puts forward type safety when connecting channels of different types with each other:
 // the consistency of your pipeline scaffolding should be ensured at build time.
 //
-// Error handling
+// # Error handling
 //
 // Pipelines are not akin to "promises" as there is no handling of the rejected state.
 // Blocking errors should be handled by having the runner return an error.

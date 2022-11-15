@@ -14,7 +14,6 @@ import (
 // with a few FanIn options available to introduce hooks, which could be used for example to:
 // * collect metrics and logging
 // * apply some data transform
-//
 type FanInPipeline[INOUT any, BUS any] struct {
 	*commonPipeline[INOUT, INOUT, BUS]
 	*fanInOptions[INOUT, BUS]
