@@ -5,14 +5,29 @@ on:
     branches:
       - master
 jobs:
-  test_config:
+  test_patterns:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+    container: 
+      image: golang
+      env:
+        PGUSER: postgres
+        PGPASSWORD: postgres
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: '>=1.19.0'
       - uses: actions/checkout@v3
       - name: Test config package
         run: |
