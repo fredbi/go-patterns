@@ -17,7 +17,7 @@ type (
 	StructIterator[T any] interface {
 		Iterator
 
-		// Item return the current iterated item.
+		// Item returns the current iterated item.
 		//
 		// Next() must have been called at least once.
 		Item() (T, error)

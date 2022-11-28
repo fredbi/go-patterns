@@ -14,7 +14,7 @@ func TestExecutor(t *testing.T) {
 			count  uint64
 		)
 
-		e := NewExecutor[int](5, func(in Batch[int]) {
+		e := NewBatchExecutor[int](5, func(in []int) {
 			if len(in) == 0 {
 				return
 			}
@@ -32,13 +32,37 @@ func TestExecutor(t *testing.T) {
 		require.Equal(t, count, e.Executed())
 	})
 
+	t.Run("should just work", func(t *testing.T) {
+		var (
+			called int
+			count  uint64
+		)
+
+		e := NewBatchExecutor[*int](5, func(in []*int) {
+			if len(in) == 0 {
+				return
+			}
+			count += uint64(len(in))
+			called++
+		})
+
+		for _, item := range []int{1, 2, 3} {
+			e.Push(&item)
+		}
+		e.Flush()
+
+		require.Equal(t, 1, called)
+		require.Equal(t, uint64(3), count)
+		require.Equal(t, count, e.Executed())
+	})
+
 	t.Run("should execute exact matching batch", func(t *testing.T) {
 		var (
 			called int
 			count  uint64
 		)
 
-		e := NewExecutor[int](2, func(in Batch[int]) {
+		e := NewBatchExecutor[int](2, func(in []int) {
 			if len(in) == 0 {
 				return
 			}
@@ -62,7 +86,7 @@ func TestExecutor(t *testing.T) {
 			count  uint64
 		)
 
-		e := NewPointerExecutor[int](2, func(in Batch[*int]) {
+		e := NewBatchPointerExecutor[int](2, func(in []*int) {
 			if len(in) == 0 {
 				return
 			}
@@ -88,7 +112,7 @@ func TestExecutor(t *testing.T) {
 			count  uint64
 		)
 
-		e := NewPointerExecutor[int](2, func(in Batch[*int]) {
+		e := NewBatchPointerExecutor[int](2, func(in []*int) {
 			if len(in) == 0 {
 				return
 			}
@@ -121,7 +145,7 @@ func TestExecutor(t *testing.T) {
 			}
 		}
 
-		_ = NewExecutor[int](2, func(in Batch[int]) {}, dummyOption())
+		_ = NewBatchExecutor[int](2, func(in []int) {}, dummyOption())
 
 		require.Equal(t, 1, called)
 	})
@@ -133,7 +157,7 @@ func TestExecutor(t *testing.T) {
 			sum    int
 		)
 
-		e := NewExecutor[int](3, func(in Batch[int]) {
+		e := NewBatchExecutor[int](3, func(in []int) {
 			if len(in) == 0 {
 				return
 			}
