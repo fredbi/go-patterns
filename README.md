@@ -16,13 +16,13 @@ Musings with go1.18 generics to implement a few simple algorithms.
 ## Iterators
 
 A collection of iterator utitilies:
-* an iterator is essentially something that knows what's `Next() bool` and collect the next `Item() T`
+* an iterator is essentially something that knows what's `Next() bool` and collects the next available `Item() T`
 * the `iterators` package exposes 3 generic variants:
-  1. Simple iterator from a slice `[]T` (e.g. to build mocks, etc)
-  2. SQL rows iterator using github.com/jmoiron/sqlx.Rows and the `StructScan(interface{}) error` method.
+  1. A simple iterator over an underlying slice `[]T` (e.g. to build mocks, etc)
+  2. SQL rows iterator using `github.com/jmoiron/sqlx.Rows` and the `StructScan(interface{}) error` method.
      (this is used to iterate over unmarshaled structs scanned from a SQL cursor).
-  3. ChanIterator that joins a collection of input iterators in parallel (the result is unordered).
-  4. TransformIterator that applies a data transform on the iterations of some other base iterator.
+  3. A `ChanIterator` that joins a collection of input iterators in parallel (the result is unordered).
+  4. A `TransformIterator` that applies a data transform on the iterations of some other base iterator.
 
 > NOTE: I like the iterator pattern a lot when it comes to fetch from a database an arbitrary number of rows.
 > Iterators allow a stream of data to traverse all the layers of an app without undue intermediary buffering.

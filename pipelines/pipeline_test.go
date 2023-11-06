@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPipeline(t *testing.T) {
+func TestPipeline(_ *testing.T) {
 	/*
 		p := New[int, int, struct{}]("my pipe")
 
