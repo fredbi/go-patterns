@@ -28,7 +28,7 @@ func ExampleExecutor() {
 
 	const n = 42
 
-	batchExecutor := batchers.NewExecutor[testItem](10, func(in batchers.Batch[testItem]) {
+	batchExecutor := batchers.NewBatchExecutor[testItem](10, func(in []testItem) {
 		if len(in) == 0 {
 			return
 		}
@@ -36,7 +36,7 @@ func ExampleExecutor() {
 		fmt.Printf("processing batch [%d items]: [%d-%d]\n", len(in), in[0].A, in[len(in)-1].A)
 	})
 
-	batchExecutorWithPointers := batchers.NewPointerExecutor[testItem](10, func(in batchers.Batch[*testItem]) {
+	batchExecutorWithPointers := batchers.NewBatchPointerExecutor[testItem](10, func(in []*testItem) {
 		if len(in) == 0 {
 			return
 		}

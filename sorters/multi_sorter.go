@@ -42,7 +42,7 @@ func (s Multi[T]) Collection() []T {
 }
 
 // NewMulti produces a sortable object, that supports multiple sorting criteria.
-func NewMulti[T any](collection []T, criteria ...Comparison[T] /* sort options */) *Multi[T] {
+func NewMulti[T any](collection []T, criteria ...Comparison[T]) *Multi[T] {
 	return &Multi[T]{
 		collection:       collection,
 		criteria:         criteria,

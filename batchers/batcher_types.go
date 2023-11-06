@@ -5,14 +5,10 @@ import (
 )
 
 type (
-	// TypeConstraint is any type.
-	TypeConstraint interface {
-		any
-	}
-
-	// Batch[T TypeConstraint] is a slice of elements used to define a processing batch.
-	// A Batch knows how to produce a clone of its elements.
-	Batch[T TypeConstraint] []T
+	// batch[T TypeConstraint] is a slice of elements used to define a processing batch.
+	//
+	// In particular, batch knows how to produce a clone of its elements.
+	batch[T TypeConstraint] []T
 
 	baseExecutor[T TypeConstraint] struct {
 		batchSize int
@@ -23,20 +19,20 @@ type (
 )
 
 // Clone the elements of the batch.
-func (b Batch[T]) Clone() Batch[T] {
-	clone := make(Batch[T], len(b))
+func (b batch[T]) Clone() batch[T] {
+	clone := make(batch[T], len(b))
 	copy(clone, b)
 
 	return clone
 }
 
 // Len yields the number of elements in the batch.
-func (b Batch[T]) Len() int {
+func (b batch[T]) Len() int {
 	return len(b)
 }
 
 // Empty returns an empty batch.
-func (b Batch[T]) Empty() Batch[T] {
+func (b batch[T]) Empty() batch[T] {
 	return b[:0]
 }
 
