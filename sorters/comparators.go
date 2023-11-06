@@ -100,7 +100,7 @@ func StringsPtrComparator(opts ...CompareOption) Comparison[*string] {
 }
 
 // BoolsComparator compare booleans: false < true.
-func BoolsComparator(opts ...CompareOption) Comparison[bool] {
+func BoolsComparator(_ ...CompareOption) Comparison[bool] {
 	return func(a, b bool) int {
 		if a == b {
 			return 0

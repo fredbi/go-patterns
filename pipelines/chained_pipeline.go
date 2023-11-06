@@ -155,7 +155,7 @@ func (p *ChainedPipeline[IN, OUT, BUS]) Finally(end *CollectorPipeline[OUT, BUS]
 	return n
 }
 
-func (p *ChainedPipeline[IN, OUT, BUS]) mustBeRunnable(e *list.Element) Runnable[BUS] {
+func (p *ChainedPipeline[IN, OUT, BUS]) mustBeRunnable(_ *list.Element) Runnable[BUS] {
 	val, ok := p.chain.Back().Value.(Runnable[BUS])
 	if !ok {
 		panic("dev error")
